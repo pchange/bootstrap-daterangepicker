@@ -58,6 +58,7 @@
                       '<input class="input-mini" type="text" name="daterangepicker_end" value="" />' +
                     '</div>' +
                     '<button class="applyBtn" disabled="disabled" type="button"></button>&nbsp;' +
+                    '<button class="cleanBtn" type="button"></button>&nbsp;' +
                     '<button class="cancelBtn" type="button"></button>' +
                   '</div>' +
                 '</div>' +
@@ -90,6 +91,7 @@
         this.container.find('.ranges')
             .on('click.daterangepicker', 'button.applyBtn', $.proxy(this.clickApply, this))
             .on('click.daterangepicker', 'button.cancelBtn', $.proxy(this.clickCancel, this))
+            .on('click.daterangepicker', 'button.cleanBtn', $.proxy(this.clickClean, this))
             .on('click.daterangepicker', '.daterangepicker_start_input,.daterangepicker_end_input', $.proxy(this.showCalendars, this))
             .on('change.daterangepicker', '.daterangepicker_start_input,.daterangepicker_end_input', $.proxy(this.inputsChanged, this))
             .on('keydown.daterangepicker', '.daterangepicker_start_input,.daterangepicker_end_input', $.proxy(this.inputsKeydown, this))
@@ -144,6 +146,7 @@
             this.buttonClasses = ['btn', 'btn-small btn-sm'];
             this.applyClass = 'btn-success';
             this.cancelClass = 'btn-default';
+            this.cleanClass = 'btn-danger';
 
             this.format = 'MM/DD/YYYY';
             this.separator = ' - ';
@@ -151,6 +154,7 @@
             this.locale = {
                 applyLabel: 'Apply',
                 cancelLabel: 'Cancel',
+                cleanLabel: 'Clean',
                 fromLabel: 'From',
                 toLabel: 'To',
                 weekLabel: 'W',
@@ -198,6 +202,9 @@
             if (typeof options.cancelClass === 'string')
                 this.cancelClass = options.cancelClass;
 
+            if (typeof options.cleanClass === 'string')
+                this.cleanClass = options.cleanClass;
+
             if (typeof options.dateLimit === 'object')
                 this.dateLimit = options.dateLimit;
 
@@ -223,6 +230,10 @@
 
                 if (typeof options.locale.cancelLabel === 'string') {
                   this.locale.cancelLabel = options.locale.cancelLabel;
+                }
+
+                if (typeof options.locale.cleanLabel === 'string') {
+                  this.locale.cleanLabel = options.locale.cleanLabel;
                 }
 
                 if (typeof options.locale.fromLabel === 'string') {
@@ -290,7 +301,7 @@
             if (typeof options.autoApply === 'boolean') {
                 this.autoApply = options.autoApply;
                 if (this.autoApply)
-                  this.container.find('.applyBtn, .cancelBtn').addClass('hide');
+                  this.container.find('.applyBtn, .cancelBtn, .cleanBtn').addClass('hide');
             }
 
             // update day names order to firstDay
@@ -328,11 +339,11 @@
 
             // bind the time zone used to build the calendar to either the timeZone passed in through the options or the zone of the startDate (which will be the local time zone by default)
             if (typeof options.timeZone === 'string' || typeof options.timeZone === 'number') {
-            	if (typeof options.timeZone === 'string' && typeof moment.tz !== 'undefined') {
-            		this.timeZone = moment.tz.zone(options.timeZone).parse(new Date) * -1;	// Offset is positive if the timezone is behind UTC and negative if it is ahead.
-            	} else {
-            		this.timeZone = options.timeZone;
-            	}
+                if (typeof options.timeZone === 'string' && typeof moment.tz !== 'undefined') {
+                    this.timeZone = moment.tz.zone(options.timeZone).parse(new Date) * -1;  // Offset is positive if the timezone is behind UTC and negative if it is ahead.
+                } else {
+                    this.timeZone = options.timeZone;
+                }
               this.startDate.utcOffset(this.timeZone);
               this.endDate.utcOffset(this.timeZone);
             } else {
@@ -461,8 +472,11 @@
                 this.container.find('.applyBtn').addClass(this.applyClass);
             if (this.cancelClass.length)
                 this.container.find('.cancelBtn').addClass(this.cancelClass);
+            if (this.cleanClass.length)
+                this.container.find('.cleanBtn').addClass(this.cleanClass);
             this.container.find('.applyBtn').html(this.locale.applyLabel);
             this.container.find('.cancelBtn').html(this.locale.cancelLabel);
+            this.container.find('.cleanBtn').html(this.locale.cleanLabel);
         },
 
         setStartDate: function(startDate) {
@@ -550,9 +564,9 @@
         
         keydown: function (e) {
             //hide on tab or enter
-        	if ((e.keyCode === 9) || (e.keyCode === 13)) {
-        		this.hide();
-        	}
+            if ((e.keyCode === 9) || (e.keyCode === 13)) {
+                this.hide();
+            }
         },
 
         notify: function () {
@@ -563,7 +577,7 @@
 
         move: function () {
             var parentOffset = { top: 0, left: 0 },
-            	containerTop;
+                containerTop;
             var parentRightEdge = $(window).width();
             if (!this.parentEl.is('body')) {
                 parentOffset = {
@@ -574,9 +588,9 @@
             }
             
             if (this.drops == 'up')
-            	containerTop = this.element.offset().top - this.container.outerHeight() - parentOffset.top;
+                containerTop = this.element.offset().top - this.container.outerHeight() - parentOffset.top;
             else
-            	containerTop = this.element.offset().top + this.element.outerHeight() - parentOffset.top;
+                containerTop = this.element.offset().top + this.element.outerHeight() - parentOffset.top;
             this.container[this.drops == 'up' ? 'addClass' : 'removeClass']('dropup');
 
             if (this.opens == 'left') {
@@ -899,6 +913,12 @@
             this.updateCalendars();
             this.hide();
             this.element.trigger('cancel.daterangepicker', this);
+        },
+
+        clickClean: function (e) {
+            this.hide();
+            this.element.val('');
+            this.element.trigger('clean.daterangepicker', this);
         },
 
         updateMonthYear: function (e) {

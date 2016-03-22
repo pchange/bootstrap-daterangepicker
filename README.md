@@ -100,6 +100,8 @@ Options may also be set using HTML5 data attributes. For example, timePicker="tr
 
 `cancelClass`: (string) CSS class string that will be added to the cancel button
 
+`cleanClass`: (string) CSS class string that will be added to the clean button
+
 `format`: (string) Date/time format string used by moment when parsing or displaying the selected dates
 
 `separator`: (string) Separator string to display between the start and end date when populating a text input the picker is attached to
@@ -147,18 +149,7 @@ Several events are triggered on the element you attach the picker to, which you 
 
 `cancel.daterangepicker`: Triggered when the cancel button is clicked
 
-Some applications need a "clear" instead of a "cancel" functionality, which can be achieved by changing the button label and watching for the cancel event:
-
-````
-$('#daterange').daterangepicker({
-  locale: { cancelLabel: 'Clear' }  
-});
-
-$('#daterange').on('cancel.daterangepicker', function(ev, picker) {
-  //do something, like clearing an input
-  $('#daterange').val('');
-});
-````
+`clean.daterangepicker`: Triggered when the clean button is clicked
 
 While passing in a callback to the constructor is the easiest way to listen for changes in the selected date range, you can also do something every time the apply button is clicked even if the selection hasn't changed:
 
